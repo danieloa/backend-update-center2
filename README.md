@@ -1,4 +1,7 @@
 # update center .json file creation
+forked from: https://github.com/ikedam/backend-update-center2
+changes:
+1. pom.xml file to set right compiler target information
 
 ## we need to use Java JDK 8 so we use docker image openjdk:8-jdk-buster and add some packages
 ```bash
