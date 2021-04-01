@@ -25,7 +25,7 @@ cat my-update-center.key my-update-center.crt > my-update-center.pem
 ### git clone my repo. This repo only differs from original in the pom.xml file that has been updated to target right java version (8)
 `git clone https://github.com/danieloa/backend-update-center2.git && cd backend-update-center2`
 
-### only for documentation purpises, the pom.xml contains these extra lines to select the maven compiler
+### only for documentation purposes, the pom.xml contains these extra lines to select the maven compiler
 ```bash
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
