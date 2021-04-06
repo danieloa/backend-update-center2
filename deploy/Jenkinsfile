@@ -1,0 +1,72 @@
+// Uses Declarative syntax to run commands inside a container.
+pipeline {
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: shell
+    image: openjdk_maven:latest
+    command:
+    - sleep
+    args:
+    - infinity
+    volumeMounts:
+    - name: plugins
+      mountPath: "/plugins"
+    - name: my_update_center_key
+      mountPath: "/cert/my_update_center.key"
+    - name: my_update_center_crt
+      mountPath: "/cert/my_update_center.crt"
+  volumes:
+  - name: plugins
+    emptyDir: {}
+  - name: my_update_center_key
+    secret:
+      secretName: my_update_center.key
+  - name: my_update_center_crt
+    secret:
+      secretName: my_update_center.crt
+'''
+            defaultContainer 'shell'
+        }
+    }
+    parameters{    
+        string(name: '$artifactory_url', defaultValue: 'zzz-632389697.us-east-1.yyy.xxx.com', description: 'url') 
+        string(name: '$user', defaultValue: 'admin', description: 'url') 
+        string(name: '$pwd', defaultValue: 'pwd', description: 'url') 
+    }
+    stages {
+        stage('create') {
+            steps {
+                sh '''
+                mvn compile
+                echo "building"
+                mvn exec:java -Dexec.args="-id my-update-center \
+                    -h /dev/null \
+                    -o /plugins/update-center.json \
+                    -r release-history.json \
+                    -repository http://zzz-632389697.us-east-1.yyy.xxx.com/artifactory/local-jenkins/ \
+                    -hpiDirectory /plugins \
+                    -nowiki \
+                    -key /certs/my-update-center.key \
+                    -certificate /certs/my-update-center.crt \
+                    -root-certificate /certs/my-update-center.crt"
+                '''
+            }
+        }
+        stage('upload') {
+            steps {
+                sh '''
+                cat /plugins/update-center.json
+                curl -v --user $user:$pwd --data-binary "@/plugins/beer.hpi" -X PUT "http://$artifactory_url/artifactory/local-jenkins/beer.hpi"
+                curl -v --user $user:$pwd --data-binary "@/plugins/chucknorris.hpi" -X PUT "http://$artifactory_url/artifactory/local-jenkins/chucknorris.hpi"
+                curl -v --user $user:$pwd --data-binary "@/plugins/update-center.json" -X PUT "https://$artifactory_url/artifactory/local-jenkins/update-center.json"
+                '''
+            }
+        }        
+    }
+}
+

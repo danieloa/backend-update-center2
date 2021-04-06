@@ -12,7 +12,6 @@ apt-get install vim git maven -y
 ### move to working dir
 ```bash
 cd /tmp
-git clone https://github.com/ikedam/backend-update-center2 && cd backend-update-center2
 ```
 
 ### generate key and cert - we will add them to artifactory and CB Sidecar Injector
@@ -51,7 +50,7 @@ wget https://jenkins-updates.cloudbees.com/download/plugins/beer/*latest*/beer.h
 mvn exec:java -Dexec.args="-id my-update-center \
     -h /dev/null \
     -o update-center.json \
-    -r release-history.json
+    -r release-history.json \
     -repository http://<ARTIFACTORY_URL>/artifactory/local-jenkins/ \
     -hpiDirectory ./plugins \
     -nowiki \
@@ -69,7 +68,7 @@ curl -v --user user:pwd --data-binary "@update-center.json" -X PUT "https://<ART
 ```
 
 ### TODO:
-- upload cert to OC.
+- upload cert to OC & Artifactory.
 - set update-center url to artifactory
 - check for updates
 
